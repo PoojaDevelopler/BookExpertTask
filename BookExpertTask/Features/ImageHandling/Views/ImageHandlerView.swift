@@ -110,40 +110,7 @@ struct ImageHandlerView: View {
             )
         }
     }
-    
-//    private func showSavedImage() -> some View {
-//        Group {
-//            if !viewModel.savedImages.isEmpty {
-//                VStack(alignment: .leading, spacing: 10) {
-//                    Text("Previous Images")
-//                        .font(.title2)
-//                        .fontWeight(.bold)
-//                        .padding(.horizontal, 20)
-//                    
-//                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 10) {
-//                        ForEach(Array(viewModel.savedImages.enumerated()), id: \.offset) { index, image in
-//                            let image = image
-//                            Image(uiImage: image)
-//                                .resizable()
-//                                .aspectRatio(contentMode: .fill)
-//                                .frame(width: UIScreen.main.bounds.width / 3 - 15,
-//                                       height: UIScreen.main.bounds.width / 3 - 15)
-//                                .clipShape(RoundedRectangle(cornerRadius: 10))
-//                                .shadow(radius: 3)
-//                            
-//                        }
-//                    }
-//                    .padding(.horizontal, 20)
-//                }
-//            } else {
-//                Text("No saved images yet")
-//                    .font(.subheadline)
-//                    .foregroundColor(.secondary)
-//                    .padding(.horizontal, 20)
-//            }
-//        }
-//    }
-    
+
     private func showSavedImage() -> some View {
         Group {
             if !viewModel.savedImages.isEmpty {
