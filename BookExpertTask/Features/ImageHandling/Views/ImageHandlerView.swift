@@ -43,7 +43,7 @@ struct ImageHandlerView: View {
                 
                 
             }
-            .navigationTitle("Image Handler")
+            .navigationTitle("Photos")
             .navigationBarTitleDisplayMode(.large)
             
             //  the toolbar
