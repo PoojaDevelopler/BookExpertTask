@@ -2,9 +2,10 @@ import SwiftUI
 
 struct MainTabView: View {
     @StateObject private var authViewModel = AuthViewModel()
+    private let notificationViewModel = NotificationViewModel()
     private let notificationDelegate = NotificationDelegate()
     init(){
-        requestNotificationPermission()
+        notificationViewModel.requestNotificationPermission()
         _ = notificationDelegate
     }
     
