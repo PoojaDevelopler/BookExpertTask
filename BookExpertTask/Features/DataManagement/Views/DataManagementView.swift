@@ -71,47 +71,66 @@ struct DataManagementView: View {
             ForEach(viewModel.filteredItems, id: \.id) { item in
                 itemRow(item)
             }
+            .onDelete(perform: deleteItems)
         }
         .refreshable {
             viewModel.loadItems()
         }
     }
     
+    private func deleteItems(at offsets: IndexSet) {
+        for index in offsets {
+            let item = viewModel.filteredItems[index]
+            viewModel.deleteItem(item)
+        }
+    }
+    
     private func itemRow(_ item: APIObjectEntity) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: Constants.UI.defaultSpacing) {
-                Text(item.name ?? "Unnamed Item")
-                    .font(.body)
-                    .foregroundColor(.primary)
-                
-                if let createdAt = item.createdAt {
-                    Text("Created: \(createdAt.formatted())")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            Spacer()
-            
-            Menu {
-                Button {
-                    selectedItem = item
-                } label: {
-                    Label("Edit", systemImage: "pencil")
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                VStack(alignment: .leading, spacing: 6) {
+                    // Title
+                    Text(item.name ?? "Unnamed Item")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    
+                    // Created date (if any)
+                    if let createdAt = item.createdAt {
+                        Text("Created: \(createdAt.formatted(date: .abbreviated, time: .omitted))")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
                 
-                Button(role: .destructive) {
-                    itemToDelete = item
-                    showingDeleteAlert = true
+                Spacer()
+                
+                // Action menu
+                Menu {
+                    Button {
+                        selectedItem = item
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    
+                    Button(role: .destructive) {
+                        itemToDelete = item
+                        showingDeleteAlert = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    Image(systemName: "ellipsis.circle")
+                        .font(.title2)
+                        .foregroundColor(.blue)
                 }
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .foregroundColor(.secondary)
             }
         }
-        .padding(.vertical, Constants.UI.defaultSpacing)
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+        .shadow(color: .black.opacity(0.02), radius: 3, x: 0, y: 2)
+        .padding(.vertical, 2)
     }
 }
 
@@ -120,7 +139,7 @@ struct ItemFormView: View {
     enum Mode {
         case add
         case edit(APIObjectEntity)
-        
+
         var title: String {
             switch self {
             case .add: return "Add Item"
@@ -130,6 +149,7 @@ struct ItemFormView: View {
     }
 
     let mode: Mode
+    let onSave: (String, [String: Any]) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var itemID: String? = nil
@@ -141,6 +161,8 @@ struct ItemFormView: View {
 
     init(mode: Mode, onSave: @escaping (String, [String: Any]) -> Void) {
         self.mode = mode
+        self.onSave = onSave
+
         if case .edit(let item) = mode {
             _itemID = State(initialValue: item.id)
             _name = State(initialValue: item.name ?? "")
@@ -229,6 +251,7 @@ struct ItemFormView: View {
             dataDict["color"] = color
         }
 
+        onSave(name, dataDict)
         dismiss()
     }
 }

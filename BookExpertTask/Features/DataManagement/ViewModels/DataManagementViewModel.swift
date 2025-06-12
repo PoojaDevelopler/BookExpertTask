@@ -3,6 +3,7 @@ import CoreData
 
 @MainActor
 class DataManagementViewModel: ObservableObject {
+    
     @Published var items: [APIObjectEntity] = []
     @Published var isLoading = false
     @Published var error: Error?
@@ -97,6 +98,7 @@ class DataManagementViewModel: ObservableObject {
                 if let id = newItem["id"] as? String {
                     coreDataManager.saveAPIObject(id: id, name: name, data: newItem)
                     items = coreDataManager.fetchAllAPIObjects()
+                    notificationManager.sendDeleteNotification(title: "Item Added", msgBody: "\(name) has been added in your list.")
                 }
             } catch {
                 self.error = error
@@ -112,7 +114,6 @@ class DataManagementViewModel: ObservableObject {
         isLoading = true
         error = nil
 
-        // ✅ Input validation
         guard !name.trimmingCharacters(in: .whitespaces).isEmpty else {
             self.error = ValidationError.emptyName
             isLoading = false

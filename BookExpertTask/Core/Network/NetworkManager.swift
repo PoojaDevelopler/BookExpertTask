@@ -92,7 +92,6 @@ class NetworkManager {
             throw NetworkError.invalidURL
         }
         
-        
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

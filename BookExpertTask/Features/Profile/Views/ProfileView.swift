@@ -2,20 +2,16 @@ import SwiftUI
 
 struct ProfileView: View {
     @ObservedObject private var authViewModel = AuthViewModel()
-    @State private var showingMenu = false
-    @State private var showingLogoutAlert = false
     @ObservedObject private var imageHandler = ImageHandlerViewModel()
-    private let notificationManager = NotificationManager.shared
-    init() {
-        // Load saved images if any exist
-        imageHandler.loadSavedImages()
-    }
+    
+    @State private var showingLogoutAlert = false
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                // Profile Header
-                HStack(spacing: 15) {
+            VStack(spacing: 30) {
+                
+                // MARK: - Profile Card
+                VStack(spacing: 12) {
                     // Profile Image
                     if let photoURL = authViewModel.currentUser?.photoURL {
                         AsyncImage(url: photoURL) { image in
@@ -23,109 +19,78 @@ struct ProfileView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                         } placeholder: {
-                            Circle()
-                                .fill(Color.gray)
+                            ProgressView()
                         }
-                        .frame(width: 70, height: 70)
+                        .frame(width: 90, height: 90)
                         .clipShape(Circle())
-                        .shadow(radius: 5)
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .shadow(radius: 4)
+                    } else {
+                        Image(systemName: "person.circle.fill")
+                            .resizable()
+                            .foregroundColor(.gray)
+                            .frame(width: 90, height: 90)
                     }
                     
-                    // Profile Info and Stats
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(authViewModel.currentUser?.displayName ?? "Welcome Unknown user!")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.primary)
-                        Text(authViewModel.currentUser?.email ?? "")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                        
-                     
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 15)
-                .background(Color(.systemBackground))
-                .cornerRadius(10)
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-                
-                // Profile Actions
-                HStack() {
-                    Button(action: {
-//                        showingLogoutAlert = true
-                    notificationManager.sendDeleteNotification(title: "Image Deleted", msgBody: "An image has been removed from your saved list.")
-
-                    }) {
-                        Text("Logout")
-                            .font(.headline)
-                            .foregroundColor(.red)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color(.systemBackground))
-                            .cornerRadius(10)
-                    }
-                }
-                .padding(.horizontal, 20)
-                
-                if !imageHandler.savedImages.isEmpty {
-                    Text("Saved Images")
+                    // Name and email
+                    Text(authViewModel.currentUser?.displayName ?? "Welcome, Guest")
                         .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(.horizontal, 20)
+                        .fontWeight(.semibold)
                     
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 10) {
-                        ForEach(Array(imageHandler.savedImages.enumerated()), id: \.offset) { index, image in
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: UIScreen.main.bounds.width/3 - 15, height: UIScreen.main.bounds.width/3 - 15)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    .shadow(radius: 3)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                } else {
-                    Text("No saved images yet")
+                    Text(authViewModel.currentUser?.email ?? "")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                        .padding(.horizontal, 20)
                 }
-            }
-        }
-        .sheet(isPresented: $showingMenu) {
-            VStack(spacing: 20) {
-                Text("Profile Actions")
-                    .font(.headline)
-                    .padding()
-                
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(.ultraThinMaterial)
+                .cornerRadius(20)
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+
+                // MARK: - Logout Button
                 Button(action: {
                     showingLogoutAlert = true
                 }) {
-                    HStack {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                            .foregroundColor(.red)
-                        Text("Logout")
-                            .foregroundColor(.red)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.red.opacity(0.1))
-                    .cornerRadius(10)
-                }
-                
-                Button(action: {
-                    showingMenu = false
-                }) {
-                    Text("Cancel")
+                    Label("Logout", systemImage: "rectangle.portrait.and.arrow.right")
+                        .font(.headline)
+                        .foregroundColor(.red)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.gray.opacity(1))
-                        .cornerRadius(10)
+                        .background(Color.red.opacity(0.1))
+                        .cornerRadius(12)
                 }
+                .padding(.horizontal, 20)
+
+                // MARK: - Saved Images Section
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Saved Images")
+                        .font(.headline)
+                        .padding(.horizontal, 20)
+                    
+                    if imageHandler.savedImages.isEmpty {
+                        Text("No saved images yet.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 20)
+                    } else {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 10) {
+                            ForEach(Array(imageHandler.savedImages.enumerated()), id: \.offset) { _, image in
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: UIScreen.main.bounds.width / 3 - 15,
+                                           height: UIScreen.main.bounds.width / 3 - 15)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .shadow(radius: 2)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                }
+
+                Spacer()
             }
-            .presentationDetents([.medium])
         }
         .alert("Logout Confirmation", isPresented: $showingLogoutAlert) {
             Button("Cancel", role: .cancel) { }
@@ -136,9 +101,6 @@ struct ProfileView: View {
             Text("Are you sure you want to logout?")
         }
         .navigationTitle("Profile")
+        .navigationBarTitleDisplayMode(.inline)
     }
-}
-
-#Preview {
-    ProfileView()
 }
