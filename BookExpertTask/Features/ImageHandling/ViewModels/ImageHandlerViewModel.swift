@@ -12,7 +12,7 @@ class ImageHandlerViewModel: ObservableObject {
     @Published var savedImages: [UIImage] = []
     private let permissionManager = PermissionManager.shared
     private let container: NSPersistentContainer
-    @AppStorage("notificationsEnabled") var notificationsEnabled: Bool = true
+    private let notificationManager = NotificationManager.shared
 
     init() {
         container = CoreDataStack.shared.persistentContainer
@@ -136,45 +136,14 @@ class ImageHandlerViewModel: ObservableObject {
             }
             
             savedImages.remove(at: index)
-            if notificationsEnabled {
-                print("🔵 Notifications enabled — sending delete notification")
-                sendDeleteNotification()
-            } else {
-                print("⚪️ Notifications are disabled")
-            }
+            notificationManager.sendDeleteNotification(title: "Image Deleted", msgBody: "An image has been removed from your saved list.")
         } catch {
             print("Error deleting image: \(error.localizedDescription)")
             self.error = error
         }
     }
     
-    
-    
-    @MainActor
-    private func sendDeleteNotification() {
-        print("🟣 sendDeleteNotification() called")
-
-        let content = UNMutableNotificationContent()
-        content.title = "Image Deleted"
-        content.body = "An image has been removed from your saved list."
-        content.sound = .default
-
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
-
-        let request = UNNotificationRequest(
-            identifier: UUID().uuidString,
-            content: content,
-            trigger: trigger
-        )
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("❌ Notification error: \(error.localizedDescription)")
-            } else {
-                print("✅ Notification scheduled successfully")
-            }
-        }
-    }
+ 
     
     // MARK: - Camera Access
     func requestCameraAccess() async throws -> Bool {

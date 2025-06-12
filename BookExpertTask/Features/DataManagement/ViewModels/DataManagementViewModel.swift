@@ -103,7 +103,8 @@ class DataManagementViewModel: ObservableObject {
     
     func deleteItem(_ item: APIObjectEntity) {
         guard let id = item.id else { return }
-        
+        notificationManager.sendDeleteNotification(title: "Item Deleted", msgBody: "\(item.name ?? "Item") has been deleted from your list.")
+
         isLoading = true
         error = nil
         
@@ -113,8 +114,8 @@ class DataManagementViewModel: ObservableObject {
                 coreDataManager.deleteAPIObject(id: id)
                 items = coreDataManager.fetchAllAPIObjects()
                 
-                // Schedule notification for deleted item
-                notificationManager.scheduleDeleteNotification(for: item)
+                // notification for deleted item
+                notificationManager.sendDeleteNotification(title: "Item Deleted", msgBody: "\(item.name ?? "Item") has been deleted from your list.")
             } catch {
                 self.error = error
             }

@@ -5,7 +5,7 @@ struct ProfileView: View {
     @State private var showingMenu = false
     @State private var showingLogoutAlert = false
     @ObservedObject private var imageHandler = ImageHandlerViewModel()
-   
+    private let notificationManager = NotificationManager.shared
     init() {
         // Load saved images if any exist
         imageHandler.loadSavedImages()
@@ -54,7 +54,9 @@ struct ProfileView: View {
                 // Profile Actions
                 HStack() {
                     Button(action: {
-                        showingLogoutAlert = true
+//                        showingLogoutAlert = true
+                    notificationManager.sendDeleteNotification(title: "Image Deleted", msgBody: "An image has been removed from your saved list.")
+
                     }) {
                         Text("Logout")
                             .font(.headline)
