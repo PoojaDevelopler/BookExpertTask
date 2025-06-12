@@ -3,8 +3,6 @@
 ```
 BookExpertTask/
 ├── Application/
-│   ├── AppDelegate.swift
-│   ├── SceneDelegate.swift
 │   └── Info.plist
 ├── Core/
 │   ├── CoreData/
@@ -14,7 +12,8 @@ BookExpertTask/
 │   ├── Network/
 │   │   ├── NetworkManager.swift
 │   │   └── APIEndpoints.swift
-│   └── Extensions/
+│   └── Notifications/
+│       └── NotificationHandler.swift
 ├── Features/
 │   ├── Authentication/
 │   │   ├── Views/
@@ -22,24 +21,21 @@ BookExpertTask/
 │   │   └── Models/
 │   ├── PDFViewer/
 │   │   ├── Views/
-│   │   ├── ViewModels/
-│   │   └── Models/
+│   │   └── ViewModels/
 │   ├── ImageHandling/
 │   │   ├── Views/
-│   │   ├── ViewModels/
-│   │   └── Models/
+│   │   └──ViewModels/
 │   ├── DataManagement/
 │   │   ├── Views/
 │   │   ├── ViewModels/
 │   │   └── Models/
-│   └── Notifications/
-│       ├── Views/
-│       ├── ViewModels/
-│       └── Models/
+│   ├── Profile/
+│   │   └── Views/
+│   ├── InitialViews/
+│   │   └──Views/
+│  
 ├── Resources/
 │   ├── Assets.xcassets
-│   ├── Localizable.strings
-│   └── Colors.xcassets
 └── Utilities/
     ├── Constants.swift
     ├── ThemeManager.swift
