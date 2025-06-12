@@ -4,7 +4,6 @@ import Foundation
 struct DataManagementView: View {
     @StateObject private var viewModel = DataManagementViewModel()
     @State private var showingAddSheet = false
-    @State private var showingEditSheet = false
     @State private var selectedItem: APIObjectEntity?
     @State private var showingDeleteAlert = false
     @State private var itemToDelete: APIObjectEntity?
@@ -116,6 +115,7 @@ struct DataManagementView: View {
     }
 }
 
+
 struct ItemFormView: View {
     enum Mode {
         case add
@@ -123,45 +123,68 @@ struct ItemFormView: View {
         
         var title: String {
             switch self {
-            case .add:
-                return "Add Item"
-            case .edit:
-                return "Edit Item"
+            case .add: return "Add Item"
+            case .edit: return "Edit Item"
             }
         }
     }
-    
+
     let mode: Mode
-    let onSave: (String, [String: Any]) -> Void
-    
+
     @Environment(\.dismiss) private var dismiss
+    @State private var itemID: String? = nil
     @State private var name: String = ""
-    @State private var data: String = ""
+    @State private var price: String = ""
+    @State private var color: String = ""
     @State private var showingError = false
     @State private var errorMessage = ""
-    
+
     init(mode: Mode, onSave: @escaping (String, [String: Any]) -> Void) {
         self.mode = mode
-        self.onSave = onSave
-        
         if case .edit(let item) = mode {
+            _itemID = State(initialValue: item.id)
             _name = State(initialValue: item.name ?? "")
-            if let itemData = item.data,
-               let jsonData = try? JSONSerialization.data(withJSONObject: itemData),
-               let jsonString = String(data: jsonData, encoding: .utf8) {
-                _data = State(initialValue: jsonString)
+            if let data = item.data {
+                _price = State(initialValue: "\(data["price"] ?? "")")
+                _color = State(initialValue: "\(data["color"] ?? "")")
             }
         }
     }
-    
+
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Item Details")) {
+                // Section: Item Info (Top-level)
+                Section(header: Text("Item Info")) {
+                    if let itemID = itemID {
+                        HStack {
+                            Text("ID")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(itemID)
+                                .font(.subheadline)
+                        }
+                    }
+
                     TextField("Name", text: $name)
-                    
-                    TextEditor(text: $data)
-                        .frame(height: 200)
+                }
+
+                // Section: Data
+                Section(header: Text("Item Data")) {
+                    HStack {
+                        Text("Price")
+                            .frame(width: 80, alignment: .leading)
+                        TextField("Enter price", text: $price)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(.roundedBorder)
+                    }
+
+                    HStack {
+                        Text("Color")
+                            .frame(width: 80, alignment: .leading)
+                        TextField("Enter color", text: $color)
+                            .textFieldStyle(.roundedBorder)
+                    }
                 }
             }
             .navigationTitle(mode.title)
@@ -172,12 +195,11 @@ struct ItemFormView: View {
                         dismiss()
                     }
                 }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         saveItem()
                     }
-                    .disabled(name.isEmpty)
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
             .alert("Error", isPresented: $showingError) {
@@ -187,34 +209,26 @@ struct ItemFormView: View {
             }
         }
     }
-    
+
     private func saveItem() {
-        guard !name.isEmpty else {
+        guard !name.trimmingCharacters(in: .whitespaces).isEmpty else {
             errorMessage = "Name cannot be empty"
             showingError = true
             return
         }
-        
-        var jsonData: [String: Any] = [:]
-        
-        if !data.isEmpty {
-            do {
-                if let data = data.data(using: .utf8),
-                   let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    jsonData = json
-                } else {
-                    errorMessage = "Invalid JSON data"
-                    showingError = true
-                    return
-                }
-            } catch {
-                errorMessage = "Error parsing JSON: \(error.localizedDescription)"
-                showingError = true
-                return
-            }
+
+        var dataDict: [String: Any] = [:]
+
+        if let priceValue = Double(price) {
+            dataDict["price"] = priceValue
+        } else if !price.isEmpty {
+            dataDict["price"] = price
         }
-        
-        onSave(name, jsonData)
+
+        if !color.trimmingCharacters(in: .whitespaces).isEmpty {
+            dataDict["color"] = color
+        }
+
         dismiss()
     }
 }

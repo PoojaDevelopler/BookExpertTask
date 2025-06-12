@@ -25,7 +25,19 @@ class DataManagementViewModel: ObservableObject {
         loadItems()
     }
     
-
+    enum ValidationError: LocalizedError {
+        case emptyName
+        case emptyData
+        
+        var errorDescription: String? {
+            switch self {
+            case .emptyName:
+                return "Name cannot be empty."
+            case .emptyData:
+                return "Data must contain at least one key-value pair."
+            }
+        }
+    }
     
     // MARK: - Data Loading
     
@@ -65,11 +77,23 @@ class DataManagementViewModel: ObservableObject {
     func createItem(name: String, data: [String: Any]) {
         isLoading = true
         error = nil
+
+        // ✅ Input validation
+        guard !name.trimmingCharacters(in: .whitespaces).isEmpty else {
+            self.error = ValidationError.emptyName
+            isLoading = false
+            return
+        }
         
+        guard !data.isEmpty else {
+            self.error = ValidationError.emptyData
+            isLoading = false
+            return
+        }
+
         Task {
             do {
                 let newItem = try await networkManager.createObject(["name": name, "data": data])
-                
                 if let id = newItem["id"] as? String {
                     coreDataManager.saveAPIObject(id: id, name: name, data: newItem)
                     items = coreDataManager.fetchAllAPIObjects()
@@ -77,17 +101,30 @@ class DataManagementViewModel: ObservableObject {
             } catch {
                 self.error = error
             }
-            
+
             isLoading = false
         }
     }
     
     func updateItem(_ item: APIObjectEntity, name: String, data: [String: Any]) {
         guard let id = item.id else { return }
-        
+
         isLoading = true
         error = nil
-        
+
+        // ✅ Input validation
+        guard !name.trimmingCharacters(in: .whitespaces).isEmpty else {
+            self.error = ValidationError.emptyName
+            isLoading = false
+            return
+        }
+
+        guard !data.isEmpty else {
+            self.error = ValidationError.emptyData
+            isLoading = false
+            return
+        }
+
         Task {
             do {
                 let updatedItem = try await networkManager.updateObject(id: id, object: ["name": name, "data": data])
@@ -96,7 +133,7 @@ class DataManagementViewModel: ObservableObject {
             } catch {
                 self.error = error
             }
-            
+
             isLoading = false
         }
     }
