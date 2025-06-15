@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @ObservedObject private var authViewModel = AuthViewModel()
+    
+    @EnvironmentObject var authViewModel: AuthViewModel
     @ObservedObject private var imageHandler = ImageHandlerViewModel()
     
     @State private var showingLogoutAlert = false
@@ -64,7 +65,7 @@ struct ProfileView: View {
 
                 // MARK: - Saved Images Section
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Saved Images")
+                    Text("Saved Images \(imageHandler.savedImages.count)")
                         .font(.headline)
                         .padding(.horizontal, 20)
                     

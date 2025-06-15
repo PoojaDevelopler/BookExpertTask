@@ -9,7 +9,7 @@ struct BookExpertTaskApp: App {
     private let notificationDelegate = NotificationDelegate()
     private let notificationManager = NotificationManager.shared
     @State private var showSplash = true
-    
+    @StateObject private var authViewModel = AuthViewModel() // ✅ Shared instance
     
     init() {
         FirebaseApp.configure()
@@ -30,6 +30,7 @@ struct BookExpertTaskApp: App {
                     }
             } else {
                 MainTabView()
+                    .environmentObject(authViewModel) // ✅ Inject here
                     .onOpenURL { url in
                         //  Handle Google Sign-In callback
                         GIDSignIn.sharedInstance.handle(url)

@@ -80,6 +80,7 @@ class AuthViewModel: ObservableObject {
             try Auth.auth().signOut()
             self.currentUser = nil
             self.isAuthenticated = false
+            print("Signed out. isAuthenticated = \(self.isAuthenticated)") // ✅
             UserDefaults.standard.removeObject(forKey: Constants.UserDefaultsKeys.isUserLoggedIn)
         } catch {
             self.error = error
